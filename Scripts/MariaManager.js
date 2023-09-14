@@ -11,14 +11,10 @@ class MariaManager {
         GetData(`SELECT * FROM Account WHERE AuthCode = '${_authCode}'`, _callback)
     }
 
-    GetUserData = (_authCode, _callback) => {
-        GetData(`SELECT * FROM Account WHERE AuthCode = '${_authCode}'`, _callback)
-    }
-
-    CreateNewUser = (_token, _callback) => {
+    CreateNewUser = (_authCode, _callback) => {
         GetRandomAuthCode(_resultAuthCode => {
 
-            query(`INSERT INTO \`Account\` (\`Token\`, \`AuthCode\`, \`LastLogin\`) VALUES ('${_token}', '${_resultAuthCode}', '${new Date().toUTCString()}')`, _result => {
+            query(`INSERT INTO \`Account\` (\`AuthCode\`, \`LastLogin\`) VALUES ('${_authCode}', '${new Date().toUTCString()}')`, _result => {
 
                 this.GetUserAuth_AuthCode(_resultAuthCode, _resultUserAuth => {
                     _callback(_resultUserAuth)
@@ -36,13 +32,18 @@ class MariaManager {
             //console.log('SetLogin Result :: ', _result)
         })
     }
+
+    GetRandomAuthCode = (_callback)=>{
+        GetRandomAuthCode(_callback);
+    }
 }
 const maria = new MariaManager()
 module.exports = maria
 
 function GetData(_key, _callback) {
     query(_key, _result => {
-        _callback(_result == undefined ? null : _result[0])
+        console.log('result', _result)
+        _callback(_result == undefined ? null : _result)
     })
 }
 

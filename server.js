@@ -13,15 +13,22 @@ express.use('/roksan', web.router)
 // 인증코드 주기
 express.get('/access', (_req, _res) => {
     authCode = _req.query['AuthCode']
+    log.add("access", authCode)
     mariaDB.GetUserAuth_AuthCode(authCode, _userInfo => {
-        resultCode = _userInfo == undefined ? enums.resultCode.UserNotFind : enums.resultCode.Success
-        packet = new req_packet(0, resultCode)
+        log.add("access/getuser/", authCode, _userInfo)
 
-        if (enums.resultCode != enums.resultCode.Success) {
-            packet.AuthCode = _userInfo.AuthCode
+        // 유저가 없어?? 새로 만들어주자
+        if (_userInfo == null) {
+            mariaDB.GetRandomAuthCode(_authCOde)
+            mariaDB.CreateNewUser()
         }
+        else {
+            resultCode = enums.resultCode.Success
+            packet = new req_packet(0, resultCode.key)
+            packet.AuthCode = _userInfo.AuthCode
 
-        _res.send(JSON.stringify(packet))
+            _res.send(JSON.stringify(packet))
+        }
     })
 })
 
