@@ -1,10 +1,10 @@
 class PacketBase{
-    protocol;
-    result;
+    prtc = 0;
+    rc = 0;
 
     constructor(_protocol, _result){
-        this.protocol = _protocol;
-        this.result = _result
+        this.prtc = _protocol;
+        this.rc = _result
     }
 }
 

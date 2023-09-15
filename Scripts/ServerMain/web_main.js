@@ -1,57 +1,52 @@
 //#region Initialize
-const mariaDB = require('../MariaManager')
+const mariaDB = require('../Manager/MariaManager')
 const log = require('../../Lib/log')
 const { express } = require('../../Lib/http')
 const { NextFunction, Request, Response, Router } = require('express');
+const req_packet = require('../../Lib/packet')
 const enums = require('../enums');
 
 const clients = []
-class CLobbyManager {
-    router;
+const router = Router()
+module.exports = router
 
-    constructor() {
-        this.router = Router()
-    }
-}
+express.use('/plus', require('./Router/Game_Plus'))
 
-const web = new CLobbyManager();
-module.exports = web
-
-express.use('/player', require('./Router/player'))
-
-web.router.all('/*', (_req, _res, _next) => {
+router.all('/*', (_req, _res, _next) => {
     const authCode = _req.headers['authorization']
-    if (authCode != undefined)
-        _req.authCode = authCode
+    if (authCode == undefined)
+        return;
+    _req.authCode = authCode
 
     if (Object.keys(_req.query).length == 0)
         log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`)
     else
         log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, _req.query)
+
+    CheckingUserConnect(_req.AuthCode, '', true)
+
     _next()
 })
 //#endregion
 
-web.router.get('/connect', (_req, _res) => {
+router.get('/connect', (_req, _res) => {
 
     // Load UserData
-    mariaDB.GetUserAuth_AuthCode(_req.authCode, _authData => {
+    mariaDB.GetUserAuth_AuthCode(_req.authCode, _userInfo => {
 
-        mariaDB.GetUserData(_authData.AuthCode, _userData => {
-            // 새로 들어왔다면
-            if (clients.length == 0 || clients.indexOf(_req.authCode) == -1) {
-                clients.push(_req.authCode)
-                log.add(`Connect :: [${clients.length}] ${_req.authCode} (${_userData.Nickname})`)
-
-                mariaDB.SetLogin(_userData.AuthCode);
-            }
-
-            _res.send(JSON.stringify(_userData))
-        })
+        // 유저가 없어?? 새로 만들어주자
+        if (_userInfo == null) {
+            mariaDB.CreateNewUser(_userInfo => {
+                ReqUserInfo(_req, _userInfo)
+            })
+        }
+        else {
+            ReqUserInfo(_req, _userInfo)
+        }
     })
 })
 
-web.router.get('/disconnect', (_req, _res) => {
+router.get('/disconnect', (_req, _res) => {
     // 나갔다면
     const index = clients.indexOf(_req.authCode)
     if (index > -1) {
@@ -61,8 +56,22 @@ web.router.get('/disconnect', (_req, _res) => {
     _res.send('thx!!')
 })
 
-web.router.get('/createUser', (_req, _res)=>{
-    mariaDB.CreateNewUser("test new token", _result =>{
-        _res.send(JSON.stringify(_result))
-    })
-})
+function ReqUserInfo(_req, _userInfo) {
+    log.add("connect/", _userInfo)
+
+    let packet = new req_packet()
+    packet.AuthCode = _userInfo.AuthCode
+    
+    _res.send(JSON.stringify(packet))
+
+    CheckingUserConnect(_req.AuthCode, _userInfo.Nickname)
+}
+
+function CheckingUserConnect(_authCode, _nickname, _isReconnect) {
+    if (clients.length == 0 || clients.indexOf(_authCode) == -1) {
+        clients.push(_authCode)
+        log.add(`${_isReconnect ? 'Reconnect' : 'Connect'} :: [${clients.length}] ${_authCode} ${_isReconnect == true ? '' : `(${_nickname})`}`)
+
+        mariaDB.SetLogin(_userData.AuthCode);
+    }
+}

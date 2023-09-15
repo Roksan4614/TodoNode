@@ -4,30 +4,21 @@ const config = require('../Scripts/config');
 
 const pool = req_maria.createPool(config.MARIA);
 
-log.add('maria pool config :: ', config.MARIA)
-log.add('maria pool :: ', pool)
-
-async function query(_query, _callback){
+async function query(_query, _callback = null) {
    let conn;
    log.add("query :: ", _query)
-   try{
-      
-      log.add("query :: 1")
+   try {
       conn = await pool.getConnection();
-      
-      log.add("query :: 2")
       const rows = await conn.query(_query);
-      
-      log.add("query :: 3")
-      _callback(rows[0]);
+      if (_callback != null)
+         _callback(rows[0]);
    }
-   catch(_err){
-      log.add("query :: 4")
-      _callback(undefined)
+   catch (_err) {
+      if (_callback != null)
+         _callback(undefined)
       throw _err;
    }
-   finally{
-      log.add("query :: 5")
+   finally {
       conn?.release();
    }
 }
