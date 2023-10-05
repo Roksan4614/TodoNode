@@ -6,12 +6,12 @@ const config = require('../config')
 
 const websocket = new req_websocket(config.PORT_WEBSOCKET_MAIN)
 console.log("Server main websocket")
-class WebsocketManager{
-    constructor(){
+class WebsocketManager {
+    constructor() {
         console.log("Server main websocket :: constructor")
     }
 
-    Connect(){
+    Connect() {
         console.log("Connect")
     }
 }
