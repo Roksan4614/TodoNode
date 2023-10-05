@@ -11,7 +11,7 @@ async function query(_query, _callback = null) {
       conn = await pool.getConnection();
       const rows = await conn.query(_query);
       if (_callback != null)
-         _callback(rows[0]);
+         _callback(rows.count == 0 ? rows[0] : rows);
    }
    catch (_err) {
       if (_callback != null)

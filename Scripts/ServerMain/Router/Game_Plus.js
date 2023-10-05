@@ -18,12 +18,16 @@ router.get('/AddRanking', (_req, _res) => {
 })
 
 rankingData = []
-router.get('/FetchRanking', (_req, _res)=>{
+router.get('/FetchRanking', (_req, _res) => {
 
 })
 
 module.exports = router;
 mariaDB.GetRankingData_Plus(_rankingData => {
-    log.add("LoadRankingData :: ", _rankingData)
-     rankingData = _rankingData
-     })
+    for (var i = 0; i < _rankingData.length; i++) {
+        rankingData.push(_rankingData[i])
+    }
+    rankingData.sort(function (a, b) {
+        return b.Point - a.Point
+    })
+})
