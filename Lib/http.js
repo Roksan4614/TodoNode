@@ -9,9 +9,6 @@ express.use(req_express.json())
 express.use(req_express.urlencoded({ extended: false }))
 express.use(req_cors())
 
-express.get('/ping', (_req, _res)=>{_res.send('pong')})
-
-
 // Create http server
 const req_http = require('http')
 const http = req_http.createServer(express)

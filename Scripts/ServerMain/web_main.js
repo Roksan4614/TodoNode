@@ -1,16 +1,43 @@
-//#region Initialize
 const mariaDB = require('../Manager/MariaManager')
 const log = require('../../Lib/log')
-const { express } = require('../../Lib/http')
 const { NextFunction, Request, Response, Router } = require('express');
 const req_packet = require('../../Lib/packet')
-const enums = require('../enums');
+//const enums = require('../enums');
 
 const clients = []
 const router = Router()
 module.exports = router
 
-express.use('/plus', require('./Router/Game_Plus'))
+router.post('/connect', (_req, _res) => {
+
+    // Load UserData
+    mariaDB.GetUserAuth_AuthID(_req.body.authID, _userInfo => {
+
+        // 유저가 없어?? 새로 만들어주자
+        if (_userInfo == null) {
+            mariaDB.CreateNewUser(_req.body.authID, _userInfo => {
+                ReqUserInfo(_res, _userInfo)
+            })
+        }
+        else {
+            ReqUserInfo(_res, _userInfo)
+        }
+    })
+})
+
+router.post('/disconnect', (_req, _res) => {
+    const authCode = _req.headers['authorization']
+    // 나갔다면
+    const index = clients.findIndex(_x => _x.authCode = authCode)
+    if (index > -1) {
+        log.add(`Disconnect :: [${clients.length - 1}] ${clients[index].nickname}`)
+        clients.splice(index, 1)
+    }
+
+    var packet = new req_packet();
+    packet.message = "thx!!"
+    _res.send(packet.ToJson())
+})
 
 router.all('/*', (_req, _res, _next) => {
     const authCode = _req.headers['authorization']
@@ -23,57 +50,27 @@ router.all('/*', (_req, _res, _next) => {
     else
         log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, _req.query)
 
-    CheckingUserConnect(_req.AuthCode, '', true)
-
     _next()
 })
-//#endregion
 
-router.get('/connect', (_req, _res) => {
+router.use('/plus', require('./Router/Game_Plus'))
 
-    // Load UserData
-    mariaDB.GetUserAuth_AuthCode(_req.authCode, _userInfo => {
-
-        // 유저가 없어?? 새로 만들어주자
-        if (_userInfo == null) {
-            mariaDB.CreateNewUser(_userInfo => {
-                ReqUserInfo(_req, _userInfo)
-            })
-        }
-        else {
-            ReqUserInfo(_req, _userInfo)
-        }
-    })
-})
-
-router.get('/disconnect', (_req, _res) => {
-    // 나갔다면
-    const index = clients.indexOf(_req.authCode)
-    if (index > -1) {
-        clients.splice(index, 1)
-        log.add(`Disconnect :: [${clients.length}] ${_req.authCode} (${_req.query['Nickname']})`)
-    }
-    _res.send('thx!!')
-})
-
-function ReqUserInfo(_req, _userInfo) {
-    log.add("connect/", _userInfo)
-
+function ReqUserInfo(_res, _userInfo) {
     let packet = new req_packet()
-    packet.AuthCode = _userInfo.AuthCode
-    packet.Nickname = _userInfo.Nickname
-    packet.Coin = _userInfo.Coin
-    
-    _res.send(JSON.stringify(packet))
+    packet.authCode = _userInfo.AuthCode
+    packet.nickname = _userInfo.Nickname
+    packet.coin = _userInfo.Coin
 
-    CheckingUserConnect(_req.AuthCode, _userInfo.Nickname)
+    _res.send(packet.ToJson())
+
+    CheckingUserConnect(_userInfo.AuthCode, _userInfo.Nickname)
 }
 
-function CheckingUserConnect(_authCode, _nickname, _isReconnect) {
+function CheckingUserConnect(_authCode, _nickname) {
     if (clients.length == 0 || clients.indexOf(_authCode) == -1) {
-        clients.push(_authCode)
-        log.add(`${_isReconnect ? 'Reconnect' : 'Connect'} :: [${clients.length}] ${_authCode} ${_isReconnect == true ? '' : `(${_nickname})`}`)
+        clients.push({ authCode: _authCode, nickname: _nickname })
+        log.add(`Connect :: [${clients.length}] ${_nickname}`)
 
-        mariaDB.SetLogin(_userData.AuthCode);
+        mariaDB.SetLogin(_authCode);
     }
 }

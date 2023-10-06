@@ -10,12 +10,12 @@ async function query(_query, _callback = null) {
    try {
       conn = await pool.getConnection();
       const rows = await conn.query(_query);
-      if (_callback != null)
-         _callback(rows.count == 0 ? rows[0] : rows);
+      if (_callback != null){
+         _callback(rows.length == 0 ? undefined : rows.length == 1 ? rows[0] : rows);
+      }
    }
    catch (_err) {
-      if (_callback != null)
-         _callback(undefined)
+      log.add(`Query Error :: ${_query} : ${_err}`)
       throw _err;
    }
    finally {

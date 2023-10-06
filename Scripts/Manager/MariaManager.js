@@ -7,19 +7,26 @@ class MariaManager {
         query(_key, _callback)
     }
 
-    GetUserAuth_Token = (_token, _callback) => {
-        query(`SELECT * FROM Account WHERE Token = '${_token}'`, _callback)
+    GetUserAuth_AuthID = (_authID, _callback) => {
+        query(`SELECT * FROM Account WHERE AuthID = '${_authID}'`, _callback)
     }
 
     GetUserAuth_AuthCode = (_authCode, _callback) => {
         query(`SELECT * FROM Account WHERE AuthCode = '${_authCode}'`, _callback)
     }
 
-    CreateNewUser = (_callback) => {
-        GetRandomAuthCode(_resultAuthCode => {
-            query(`INSERT INTO Account (AuthCode, LastLogin) VALUES ('${_authCode}', '${new Date().toUTCString()}')`, _userInfo => {
-                console.log('Create new user start :: ', _userInfo)
-                _callback(_userInfo)
+    GetUserAuth_Nickname = (_nickname, _callback) => {
+        query(`SELECT * FROM Account WHERE Nickname = '${_nickname}'`, _callback)
+    }
+
+    CreateNewUser = (_authID, _callback) => {
+        GetRandomAuthCode(_authCode => {
+            query(`INSERT INTO Account (AuthID, AuthCode, LastLogin) VALUES ('${_authID}','${_authCode}', '${new Date().toUTCString()}')`, _result => {
+
+                if (_result != undefined)
+                    this.GetUserAuth_AuthCode(_authCode, _callback);
+                else
+                    console.log('Create New User :: Failed')
             })
         })
     }
@@ -34,7 +41,7 @@ class MariaManager {
         })
     }
 
-    GetRankingData_Plus = _callback =>{
+    GetRankingData_Plus = _callback => {
         query('SELECT * FROM RankingPlus', _rankingData => { _callback(_rankingData) })
     }
 
@@ -55,7 +62,7 @@ class MariaManager {
                 _callback(null)
         })
 
-        query(`UPDATE Account SET Coin=${_coin} WHERE AuthCode=${_authCode}`)
+        query(`UPDATE Account SET Coin=Coin+${_coin} WHERE AuthCode=${_authCode}`)
     }
 }
 const maria = new MariaManager()

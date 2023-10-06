@@ -2,7 +2,7 @@
 class EnumBase {
     GetKey = _index => {
         for (const key in this) {
-            if (this[key].index != undefined && this[key].index == 0)
+            if (this[key].index == _index)
                 return key;
         }
         return 'none'
@@ -50,6 +50,7 @@ class EnumResultCode extends EnumBase {
     Success
     Failed
     UserNotFind
+    NotEnoughData
     
     constructor() {
         super()

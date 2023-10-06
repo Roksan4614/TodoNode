@@ -9,7 +9,7 @@ const websocket = new req_websocket(config.PORT_LOBBY)
 var server_main = undefined;
 websocket.OnReceiveMessage = (_sender, _protocolType, _data) => {
 
-    key = enums.protocolType.getKey(_protocolType)
+    key = enums.protocolType.GetKey(_protocolType)
 
     if (_protocolType != enums.protocolType.authenticate)
         log.addRecv(key + ' ' + _sender.token, _data)
