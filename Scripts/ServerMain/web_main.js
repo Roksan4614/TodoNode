@@ -61,6 +61,8 @@ function ReqUserInfo(_req, _userInfo) {
 
     let packet = new req_packet()
     packet.AuthCode = _userInfo.AuthCode
+    packet.Nickname = _userInfo.Nickname
+    packet.Coin = _userInfo.Coin
     
     _res.send(JSON.stringify(packet))
 

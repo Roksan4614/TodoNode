@@ -29,7 +29,7 @@ class MariaManager {
     }
 
     SetNickname = (_authCode, _nickname) => {
-        query(`UPDATE Account SET Nickname='${new Date().toUTCString()}' WHERE AuthCode='${_authCode}'`, _result => {
+        query(`UPDATE Account SET Nickname='${_nickname}' WHERE AuthCode='${_authCode}'`, _result => {
             console.log(`Nickname Change :: ${_authCode} : ${_nickname}`);
         })
     }
@@ -38,7 +38,7 @@ class MariaManager {
         query('SELECT * FROM RankingPlus', _rankingData => { _callback(_rankingData) })
     }
 
-    AddRanking_Plus = (_authCode, _point, _correctRate, _dps, _combo, _callback) => {
+    ResultGame_Plus = (_authCode, _point, _correctRate, _dps, _combo, _coin, _callback) => {
         query(`SELECT * FROM RankingPlus WHERE AuthCode = '${_authCode}'`, _rankingInfo => {
 
             if (_rankingInfo == undefined) {
@@ -54,6 +54,8 @@ class MariaManager {
             else
                 _callback(null)
         })
+
+        query(`UPDATE Account SET Coin=${_coin} WHERE AuthCode=${_authCode}`)
     }
 }
 const maria = new MariaManager()

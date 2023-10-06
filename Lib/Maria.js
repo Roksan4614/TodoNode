@@ -6,7 +6,7 @@ const pool = req_maria.createPool(config.MARIA);
 
 async function query(_query, _callback = null) {
    let conn;
-   log.add("query :: ", _query)
+   //log.add("query :: ", _query)
    try {
       conn = await pool.getConnection();
       const rows = await conn.query(_query);

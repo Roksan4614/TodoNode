@@ -22,13 +22,35 @@ router.get('/FetchRanking', (_req, _res) => {
     _res.send(JSON.stringify(packet))
 })
 
-router.get('/AddRanking', (_req, _res) => {
+router.get('/ResultGame', (_req, _res) => {
 
-    mariaDB.AddRanking_Plus(_req.authCode, _req.query.point, _req.query.correctRate, _req.query.dps, _req.query.combo, _result => {
+    mariaDB.ResultGame_Plus(_req.authCode, _req.query.point, _req.query.correctRate, _req.query.dps, _req.query.combo, _req.query.coin, _result => {
         let packet = new req_packet()
 
-        if (_result == null)
-            packet.rc = enums.resultCode.Failed
+        // 여기서 null 은 new record 가 아니라는 의미
+        if (_result != null) {
+            packet.isNewRecord = 1
+
+            // 데이타 갖고 있기
+            {
+                let recordData = {
+                    AuthCode: _req.authCode,
+                    Point: _req.query.point,
+                    CorrectRate: _req.query.correctRate,
+                    Dps: _req.query.dps,
+                    Combo: _req.query.combo
+                }
+
+                let rankerIndex = rankingData.find(_ranker => { return _ranker.AuthCode == _req.authCode })
+                if (ranker == -1) {
+                    rankingData.push(
+                        recordData
+                    )
+                }
+                else
+                    rankingData[rankerIndex] = recordData
+            }
+        }
 
         _res.send(JSON.stringify(packet))
     });
