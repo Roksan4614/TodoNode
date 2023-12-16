@@ -8,8 +8,18 @@ const clients = []
 const router = Router()
 module.exports = router
 
-router.post('/connect', (_req, _res) => {
+const api_key = 'roksan1126091011040330'
 
+router.all('/*', (_req, _res, _next) => {
+    if (api_key == _req.headers['api_key'])
+        _next()
+    else {
+        console.log(`API_KEY ERROR: ${_req.headers['api_key']}`)
+        _res.send(new req_packet("WTF_API_KEY").ToJson())
+    }
+})
+
+router.post('/Connect', (_req, _res) => {
     // Load UserData
     mariaDB.GetUserAuth_AuthID(_req.body.authID, _userInfo => {
 
@@ -25,12 +35,13 @@ router.post('/connect', (_req, _res) => {
     })
 })
 
-router.post('/disconnect', (_req, _res) => {
-    const authCode = _req.headers['authorization']
+router.post('/Disconnect', (_req, _res) => {
+    const authCode = _req.headers['authcode']
     // 나갔다면
     const index = clients.findIndex(_x => _x.authCode = authCode)
+
     if (index > -1) {
-        log.add(`Disconnect :: [${clients.length - 1}] ${clients[index].nickname}`)
+        log.add_Color(`222222`, `Disconnect:: [${clients.length - 1}] ${clients[index].nickname}`)
         clients.splice(index, 1)
     }
 
@@ -39,16 +50,24 @@ router.post('/disconnect', (_req, _res) => {
     _res.send(packet.ToJson())
 })
 
+router.post('/user_count', (_req, _res) => {
+    var packet = new req_packet()
+    packet.user_count = _req.body.password === "50252335" ? clients.length : -1
+    _res.send(packet.ToJson())
+})
+
 router.all('/*', (_req, _res, _next) => {
-    const authCode = _req.headers['authorization']
+    const authCode = _req.headers['authcode']
     if (authCode == undefined)
         return;
     _req.authCode = authCode
 
-    if (Object.keys(_req.query).length == 0)
-        log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`)
-    else
-        log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, _req.query)
+    log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, JSON.stringify(_req.body))
+
+    // if (Object.keys(_req.query).length == 0)
+    //     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`)
+    // else
+    //     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, _req.query)
 
     _next()
 })
@@ -67,9 +86,9 @@ function ReqUserInfo(_res, _userInfo) {
 }
 
 function CheckingUserConnect(_authCode, _nickname) {
-    if (clients.length == 0 || clients.indexOf(_authCode) == -1) {
+    if (clients.length == 0 || clients.some(x => x.authCode == _authCode) == false) {
         clients.push({ authCode: _authCode, nickname: _nickname })
-        log.add(`Connect :: [${clients.length}] ${_nickname}`)
+        log.add(`   Connect:: [${clients.length}] ${_nickname} (${_authCode})`)
 
         mariaDB.SetLogin(_authCode);
     }

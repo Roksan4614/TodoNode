@@ -1,13 +1,13 @@
 const enums = require('../Scripts/enums');
 
 class PacketBase {
-    prtc = 0;
-    rc = 0;
+    //protocol = 0;
+
+    constructor(resultCode = "success"){
+        this.resultCode = resultCode;
+    }
 
     ToJson() {
-        if (this.rc != 0)
-            this.message = enums.resultCode.GetKey(this.rc)
-
         return JSON.stringify(this)
     }
 }

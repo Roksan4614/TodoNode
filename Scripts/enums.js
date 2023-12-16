@@ -51,6 +51,8 @@ class EnumResultCode extends EnumBase {
     Failed
     UserNotFind
     NotEnoughData
+
+    not_enough_user_ranking_data
     
     constructor() {
         super()

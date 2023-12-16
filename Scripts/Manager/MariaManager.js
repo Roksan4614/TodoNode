@@ -45,24 +45,29 @@ class MariaManager {
         query('SELECT * FROM RankingPlus', _rankingData => { _callback(_rankingData) })
     }
 
-    ResultGame_Plus = (_authCode, _point, _correctRate, _dps, _combo, _coin, _callback) => {
+    ResultGame_Plus = (_authCode, _point, _correctRate, _dps, _combo, _coin, _option, _callback) => {
+
+        query(`UPDATE Account SET Coin='${_coin}' WHERE AuthCode='${_authCode}'`)
+
         query(`SELECT * FROM RankingPlus WHERE AuthCode = '${_authCode}'`, _rankingInfo => {
 
-            if (_rankingInfo == undefined) {
+            if (_rankingInfo == undefined || _option == 'admin') {
+
+                if (_rankingInfo != undefined && _option == 'admin')
+                    _authCode += '_'+parseInt(new Date().toISOString().replace(/\D/g, '').slice(0, 14));
+
                 query(`INSERT INTO RankingPlus (AuthCode, Point, CorrectRate, Dps, Combo)
-                 VALUES (${_authCode}, ${_point}, ${_correctRate}, ${_dps}, ${_combo})`,
+                VALUES ('${_authCode}', '${_point}', '${_correctRate}', '${_dps}', '${_combo}')`,
                     _newInfo => { _callback(_newInfo) })
             }
             else if (_rankingInfo.Point < _point) {
-                query(`UPDATE RankingPlus SET Point = ${_point}, CorrectRate = ${_correctRate}, Dps = ${_dps}, Combo = ${_combo}
-                WHERE AuthCode = ${_authCode}`,
+                query(`UPDATE RankingPlus SET Point = '${_point}', CorrectRate = '${_correctRate}', Dps = '${_dps}', Combo = '${_combo}'
+                WHERE AuthCode = '${_authCode}'`,
                     _newInfo => { _callback(_newInfo) })
             }
             else
                 _callback(null)
         })
-
-        query(`UPDATE Account SET Coin=Coin+${_coin} WHERE AuthCode=${_authCode}`)
     }
 }
 const maria = new MariaManager()

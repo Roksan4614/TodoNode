@@ -13,12 +13,17 @@ router.post('/Fetch/Ranking', (_req, _res) => {
     let packet = new req_packet()
 
     if (m_rankingData.length < 10)
-        packet.rc = enums.resultCode.NotEnoughData.index
+        packet.resultCode = enums.resultCode.not_enough_user_ranking_data.key
     else {
-        let ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
-        packet.champion = m_rankingData[0]
+        packet.champion = {
+            recordPoint: m_rankingData[0].Point,
+            mostCombo: m_rankingData[0].Combo,
+            mostCorrectRate: m_rankingData[0].CorrectRate,
+            mostDps: m_rankingData[0].Dps,
+        }
+
         packet.userCount = m_rankingData.length
-        packet.ranking = ranking
+        packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
     }
 
     _res.send(packet.ToJson())
@@ -26,7 +31,7 @@ router.post('/Fetch/Ranking', (_req, _res) => {
 
 router.post('/ResultGame', (_req, _res) => {
 
-    mariaDB.ResultGame_Plus(_req.authCode, _req.body.point, _req.body.correctRate, _req.body.dps, _req.body.combo, _req.body.coin, _result => {
+    mariaDB.ResultGame_Plus(_req.authCode, _req.body.point, _req.body.correctRate, _req.body.dps, _req.body.combo, _req.body.coin, _req.body.option, _result => {
         let packet = new req_packet()
 
         // 여기서 null 은 new record 가 아니라는 의미
@@ -43,8 +48,8 @@ router.post('/ResultGame', (_req, _res) => {
                     Combo: _req.body.combo
                 }
 
-                let rankerIndex = m_rankingData.find(_ranker => { return _ranker.AuthCode == _req.authCode })
-                if (ranker == -1) {
+                let rankerIndex = m_rankingData.findIndex(_ranker => { return _ranker.authCode == _req.authCode })
+                if (rankerIndex == -1) {
                     m_rankingData.push(
                         recordData
                     )
@@ -53,26 +58,18 @@ router.post('/ResultGame', (_req, _res) => {
                     m_rankingData[rankerIndex] = recordData
             }
         }
+        else
+            packet.isNewRecord = 0
 
         _res.send(packet.ToJson())
     });
 })
 
 mariaDB.GetRankingData_Plus(_rankingData => {
-    i = 0
-    for (; i < _rankingData.length; i++) {
-        m_rankingData.push(_rankingData[i])
-    }
-
-    for (; i < 10; i++) {
-        m_rankingData.push(
-            {
-                Point: Math.floor(Math.random() * (4000 - 1000 + 1)) + 1000,
-                CorrectRate: 100,
-                Dps: 0.113,
-                Combo: Math.floor(Math.random() * (40 - 20 + 1)) + 20
-            }
-        )
+    if (_rankingData != undefined) {
+        for (i = 0; i < _rankingData.length; i++) {
+            m_rankingData.push(_rankingData[i])
+        }
     }
 
     m_rankingData.sort(function (a, b) {
