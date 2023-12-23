@@ -22,7 +22,6 @@ class MariaManager {
     CreateNewUser = (_authID, _callback) => {
         GetRandomAuthCode(_authCode => {
             query(`INSERT INTO Account (AuthID, AuthCode, LastLogin) VALUES ('${_authID}','${_authCode}', '${new Date().toUTCString()}')`, _result => {
-
                 if (_result != undefined)
                     this.GetUserAuth_AuthCode(_authCode, _callback);
                 else
@@ -35,9 +34,9 @@ class MariaManager {
         query(`UPDATE Account SET LastLogin='${new Date().toUTCString()}' WHERE AuthCode='${_authCode}'`)
     }
 
-    SetNickname = (_authCode, _nickname) => {
+    SetNickname = (_authCode, _nickname, _callback) => {
         query(`UPDATE Account SET Nickname='${_nickname}' WHERE AuthCode='${_authCode}'`, _result => {
-            console.log(`Nickname Change :: ${_authCode} : ${_nickname}`);
+            _callback(_result)
         })
     }
 

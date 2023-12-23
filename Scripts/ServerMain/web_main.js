@@ -37,6 +37,7 @@ router.post('/Connect', (_req, _res) => {
 
 router.post('/Disconnect', (_req, _res) => {
     const authCode = _req.headers['authcode']
+
     // 나갔다면
     const index = clients.findIndex(_x => _x.authCode = authCode)
 
@@ -70,6 +71,21 @@ router.all('/*', (_req, _res, _next) => {
     //     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, _req.query)
 
     _next()
+})
+
+router.post('/nickname_change', (_req,_res) =>{
+    mariaDB.SetNickname(_req.authCode, _req.body.nickname, _result => {
+        var packet = new req_packet()
+        if( _result == null)
+            packet.resultCode = "system error"
+        else{
+            index = clients.findIndex(_x => _x.authCode = _req.authCode)
+            if (index > -1)
+                clients[index].nickname = _req.body.nickname
+        }
+
+        _res.send(packet.ToJson())
+    })
 })
 
 router.use('/plus', require('./Router/Game_Plus'))
