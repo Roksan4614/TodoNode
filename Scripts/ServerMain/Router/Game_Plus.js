@@ -26,7 +26,7 @@ router.post('/Fetch/Ranking', (_req, _res) => {
         packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
     }
 
-    _res.send(packet.ToJson())
+    packet.Send(_req.authCode, _res);
 })
 
 router.post('/ResultGame', (_req, _res) => {
@@ -64,7 +64,7 @@ router.post('/ResultGame', (_req, _res) => {
         packet.userCount = m_rankingData.length
         packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
 
-        _res.send(packet.ToJson())
+        packet.Send(_req.authCode, _res);
     });
 })
 
@@ -79,5 +79,5 @@ mariaDB.GetRankingData_Plus(_rankingData => {
         return b.Point - a.Point
     })
 
-    log.add("RankingData: ", JSON.stringify(m_rankingData))
+    log.add("RankingData: ", `UserCount: ${m_rankingData.length}`, JSON.stringify(m_rankingData))
 })

@@ -41,13 +41,15 @@ router.post('/Disconnect', (_req, _res) => {
 
     var packet = new req_packet();
     packet.message = "thx!!"
-    _res.send(packet.ToJson())
+
+    packet.Send(_req.authCode, _res)
 })
 
 router.post('/user_count', (_req, _res) => {
     var packet = new req_packet()
     packet.user_count = _req.body.password === "50252335" ? clients.length : -1
-    _res.send(packet.ToJson())
+
+    packet.Send(_req.authCode, _res)
 })
 
 router.all('/*', (_req, _res, _next) => {
@@ -64,7 +66,7 @@ router.all('/*', (_req, _res, _next) => {
     }
     _req.authCode = authCode
 
-    log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, JSON.stringify(_req.body))
+    log.add_Color('333333', `[RECV] ${_req.params[0]}:`, _req.authCode, JSON.stringify(_req.body))
 
     // if (Object.keys(_req.query).length == 0)
     //     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`)
@@ -85,7 +87,7 @@ router.post('/nickname_change', (_req,_res) =>{
                 clients[index].nickname = _req.body.nickname
         }
 
-        _res.send(packet.ToJson())
+        packet.Send(_req.authCode, _res)
     })
 })
 
@@ -97,7 +99,7 @@ function ReqUserInfo(_res, _userInfo) {
     packet.nickname = _userInfo.Nickname
     packet.coin = _userInfo.Coin
 
-    _res.send(packet.ToJson())
+    packet.Send(_userInfo.AuthCode, _res)
 
     CheckingUserConnect(_userInfo.AuthCode, _userInfo.Nickname)
 }
