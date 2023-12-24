@@ -38,6 +38,9 @@ router.post('/Connect', (_req, _res) => {
 })
 
 router.post('/Disconnect', (_req, _res) => {
+
+    console.log("Disconnect: ", _req.headers);
+
     const authCode = _req.headers['authcode']
 
     // 나갔다면
