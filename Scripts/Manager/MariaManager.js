@@ -53,12 +53,10 @@ class MariaManager {
     }
 
     ResultGame_Plus = (_authCode, _point, _correctRate, _dps, _combo, _coin, _callback) => {
-
         query(`UPDATE Account SET Coin='${_coin}' WHERE AuthCode='${_authCode}'`)
 
         query(`SELECT * FROM RankingPlus WHERE AuthCode = '${_authCode}'`, _rankingInfo => {
-
-            var isAdmin = this.adminAuth.some(x => x.AuthCode == _authCode) == true;
+            var isAdmin = this.adminAuth.some(x => x == _authCode) == true;
 
             if (_rankingInfo != undefined && _rankingInfo.Point < _point) {
                 query(`UPDATE RankingPlus SET Point = '${_point}', CorrectRate = '${_correctRate}', Dps = '${_dps}', Combo = '${_combo}'
@@ -66,7 +64,7 @@ class MariaManager {
                     _newInfo => { _callback(_newInfo) })
             }
             if (_rankingInfo == undefined || isAdmin == true) {
-                if (isAdmin == true && _rankingInfo != undefined){
+                if (isAdmin == true && _rankingInfo != undefined) {
                     _authCode += '_' + parseInt(new Date().toISOString().replace(/\D/g, '').slice(0, 14))
                     _callback(null)
                 }

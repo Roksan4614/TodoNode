@@ -64,9 +64,11 @@ router.post('/ResultGame', (_req, _res) => {
             mostDps: m_rankingData[0].Dps,
         }
 
-        packet.userCount = m_rankingData.length
-        packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
-
+        if (m_rankingData.length >= 10) {
+            packet.userCount = m_rankingData.length
+            packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
+        }
+        
         packet.Send(_req.originalUrl, _req.authCode, _res);
     });
 })
