@@ -16,7 +16,7 @@ class PacketBase {
         var jsonData = this.ToJson()
 
         if (_isLog == true)
-            log.add_Color('333333', `[SEND] ${_url}: `, _authCode, jsonData)
+            log.add_Color('333333', `[SEND] ${_url}:`, _authCode, jsonData)
 
         _res.send(jsonData)
     }
