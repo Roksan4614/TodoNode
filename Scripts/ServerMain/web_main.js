@@ -42,7 +42,7 @@ router.post('/Disconnect', (_req, _res) => {
     const index = m_clients.findIndex(_x => _x.authCode = authCode)
 
     if (index > -1) {
-        log.add_Color(`222222`, `Disconnect:: [${m_clients.length - 1}] ${m_clients[index].nickname}`)
+        log.add_Color(`222222`, `Disconnect:: [${m_clients.length - 1}] ${m_clients[index].nickname} (${authCode})`)
         m_clients.splice(index, 1)
     }
 
@@ -103,14 +103,12 @@ function ReqUserInfo(_res, _userInfo, _isAdmin = false) {
 }
 
 function CheckingUserConnect(_authCode, _nickname) {
-    if (m_clients.length == 0) {
-        if (m_clients.some(x => x.authCode == _authCode) == false) {
-            m_clients.push({ authCode: _authCode, nickname: _nickname })
-            log.add(`   Connect:: [${m_clients.length}] ${_nickname} (${_authCode})`)
-        }
-        else
-            log.add(` ReConnect:: [${m_clients.length}] ${_nickname} (${_authCode})`)
-
-        mariaDB.SetLogin(_authCode);
+    if (m_clients.length == 0 || m_clients.some(x => x.authCode == _authCode) == false) {
+        m_clients.push({ authCode: _authCode, nickname: _nickname })
+        log.add(`   Connect:: [${m_clients.length}] ${_nickname} (${_authCode})`)
     }
+    else
+        log.add(` ReConnect:: [${m_clients.length}] ${_nickname} (${_authCode})`)
+
+    mariaDB.SetLogin(_authCode);
 }
