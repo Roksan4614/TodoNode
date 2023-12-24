@@ -12,15 +12,16 @@ m_rankingData = []
 router.post('/Fetch/Ranking', (_req, _res) => {
     let packet = new req_packet()
 
-    packet.champion = {
-        recordPoint: m_rankingData[0].Point,
-        mostCombo: m_rankingData[0].Combo,
-        mostCorrectRate: m_rankingData[0].CorrectRate,
-        mostDps: m_rankingData[0].Dps,
+    if (m_rankingData.length > 0) {
+        packet.champion = {
+            recordPoint: m_rankingData[0].Point,
+            mostCombo: m_rankingData[0].Combo,
+            mostCorrectRate: m_rankingData[0].CorrectRate,
+            mostDps: m_rankingData[0].Dps,
+        }
     }
 
-    if (m_rankingData.length >= 10)
-    {
+    if (m_rankingData.length >= 10) {
         packet.userCount = m_rankingData.length
         packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
     }
