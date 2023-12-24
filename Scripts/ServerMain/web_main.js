@@ -7,15 +7,17 @@ const req_packet = require('../../Lib/packet')
 const clients = []
 const router = Router()
 module.exports = router
-
 const api_key = 'roksan1126091011040330'
 
 router.all('/*', (_req, _res, _next) => {
-    if (api_key == _req.headers['api_key'])
-        _next()
-    else {
-        console.log(`API_KEY ERROR: ${_req.headers['api_key']}`)
-        _res.send(new req_packet("WTF_API_KEY").ToJson())
+
+    console.log(_req.headers);
+
+    // if (api_key == _req.headers['api_key'])
+    //     _next()
+    // else {
+    //     console.log(`API_KEY ERROR: ${_req.headers['api_key']}`)
+    //     _res.send(new req_packet("WTF_API_KEY").ToJson())
     }
 })
 
