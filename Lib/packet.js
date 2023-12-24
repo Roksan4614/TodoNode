@@ -4,7 +4,7 @@ const log = require('../Lib/log')
 class PacketBase {
     //protocol = 0;
 
-    constructor(resultCode = "success"){
+    constructor(resultCode = "success") {
         this.resultCode = resultCode;
     }
 
@@ -12,9 +12,12 @@ class PacketBase {
         return JSON.stringify(this)
     }
 
-    Send(_authCode, _res){
+    Send(_url, _authCode, _res, _isLog = true) {
         var jsonData = this.ToJson()
-        log.add_Color('333333', '[SEND]: ', _authCode,  jsonData)
+
+        if (_isLog == true)
+            log.add_Color('333333', `[SEND] ${_url}: `, _authCode, jsonData)
+
         _res.send(jsonData)
     }
 }

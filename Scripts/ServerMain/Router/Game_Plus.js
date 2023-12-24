@@ -26,7 +26,7 @@ router.post('/Fetch/Ranking', (_req, _res) => {
         packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
     }
 
-    packet.Send(_req.authCode, _res);
+    packet.Send(_req.originalUrl, _req.authCode, _res);
 })
 
 router.post('/ResultGame', (_req, _res) => {
@@ -64,7 +64,7 @@ router.post('/ResultGame', (_req, _res) => {
         packet.userCount = m_rankingData.length
         packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
 
-        packet.Send(_req.authCode, _res);
+        packet.Send(_req.originalUrl, _req.authCode, _res);
     });
 })
 
