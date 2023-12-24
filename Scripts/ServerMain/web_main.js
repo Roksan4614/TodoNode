@@ -10,12 +10,6 @@ module.exports = router
 const api_key = 'roksan1126091011040330'
 
 // router.all('/*', (_req, _res, _next) => {
-//     if (api_key == _req.headers['api_key'])
-//         _next()
-//     else {
-//         console.log(`API_KEY ERROR: ${_req.headers['api_key']}`)
-//         _res.send(new req_packet("WTF_API_KEY").ToJson())
-//     }
 // })
 
 router.post('/Connect', (_req, _res) => {
@@ -38,9 +32,6 @@ router.post('/Connect', (_req, _res) => {
 })
 
 router.post('/Disconnect', (_req, _res) => {
-
-    console.log("Disconnect: ", _req.headers);
-
     const authCode = _req.headers['authcode']
 
     // 나갔다면
@@ -63,6 +54,14 @@ router.post('/user_count', (_req, _res) => {
 })
 
 router.all('/*', (_req, _res, _next) => {
+
+    if (api_key == _req.headers['api_key'])
+        _next()
+    else {
+        console.log(`API_KEY ERROR: ${_req.headers['api_key']}`)
+        _res.send(new req_packet("WTF_API_KEY").ToJson())
+    }
+
     const authCode = _req.headers['authcode']
     if (authCode == undefined)
         return;
