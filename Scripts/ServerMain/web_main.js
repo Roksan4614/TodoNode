@@ -13,9 +13,6 @@ const api_key = 'roksan1126091011040330'
 // })
 
 router.post('/Connect', (_req, _res) => {
-
-    console.log("connect: " + _req.body)
-
     // Load UserData
     mariaDB.GetUserAuth_AuthID(_req.body.authID, _userInfo => {
 
@@ -55,16 +52,16 @@ router.post('/user_count', (_req, _res) => {
 
 router.all('/*', (_req, _res, _next) => {
 
-    if (api_key == _req.headers['api_key'])
-        _next()
-    else {
-        console.log(`API_KEY ERROR: ${_req.headers['api_key']}`)
-        _res.send(new req_packet("WTF_API_KEY").ToJson())
+    if (api_key != _req.headers['api_key'])
+    {
+        log.add("API_KEY ERROR: ", _req.headers)
     }
 
     const authCode = _req.headers['authcode']
-    if (authCode == undefined)
+    if (authCode == undefined){
+        log.add("authCode is undefined");
         return;
+    }
     _req.authCode = authCode
 
     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, JSON.stringify(_req.body))
