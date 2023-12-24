@@ -9,8 +9,14 @@ const router = Router()
 module.exports = router
 const api_key = 'roksan1126091011040330'
 
-// router.all('/*', (_req, _res, _next) => {
-// })
+router.all('/*', (_req, _res, _next) => {
+    if (api_key != _req.headers['apikey']){
+        log.add("API_KEY ERROR: ", _req.headers['apikey'])
+        return;
+    }
+
+    _next()
+})
 
 router.post('/Connect', (_req, _res) => {
     // Load UserData
@@ -53,12 +59,6 @@ router.post('/user_count', (_req, _res) => {
 })
 
 router.all('/*', (_req, _res, _next) => {
-
-    if (api_key != _req.headers['apiKey'])
-    {
-        log.add("API_KEY ERROR: ", _req.headers['apiKey'])
-    }
-
     const authCode = _req.headers['authcode']
     if (authCode == undefined){
         log.add("authCode is undefined");
@@ -67,12 +67,6 @@ router.all('/*', (_req, _res, _next) => {
     _req.authCode = authCode
 
     log.add_Color('333333', `[RECV] ${_req.originalUrl}:`, _req.authCode, JSON.stringify(_req.body))
-
-    // if (Object.keys(_req.query).length == 0)
-    //     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`)
-    // else
-    //     log.add_Color('333333', `[RECV] ${_req.params[0]} :: ${_req.authCode}`, _req.query)
-
     _next()
 })
 
