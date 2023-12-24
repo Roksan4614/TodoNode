@@ -2,6 +2,10 @@ const query = require('../../Lib/Maria')
 
 class MariaManager {
     adminAuth = []
+    
+    IsAdmin = (_authCode) =>{
+        return this.adminAuth.length > 0 && this.adminAuth.some(x => x == _authCode) == true
+    }
 
     GetData = (_key, _callback) => {
         query(_key, _callback)
@@ -103,7 +107,6 @@ function GetRandomAuthCode(_callback) {
 
 maria.GetAdmin(_admin => {
     if (_admin != undefined) {
-
         if (_admin.AuthID == undefined) {
             for (i = 0; i < _admin.length; i++) {
                 maria.adminAuth.push(_admin[i].AuthCode)

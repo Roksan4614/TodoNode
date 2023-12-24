@@ -29,7 +29,7 @@ router.post('/Connect', (_req, _res) => {
             })
         }
         else {
-            var isAdmin = m_admin.length > 0 && m_admin.some(x => x.authID == _req.body.authID) == true
+            var isAdmin = mariaDB.IsAdmin(_userInfo.AuthCode)
             ReqUserInfo(_res, _userInfo, isAdmin)
         }
     })
