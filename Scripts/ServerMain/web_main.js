@@ -54,9 +54,9 @@ router.post('/user_count', (_req, _res) => {
 
 router.all('/*', (_req, _res, _next) => {
 
-    if (api_key != _req.headers['api_key'])
+    if (api_key != _req.headers['apiKey'])
     {
-        log.add("API_KEY ERROR: ", _req.headers['api_key'])
+        log.add("API_KEY ERROR: ", _req.headers['apiKey'])
     }
 
     const authCode = _req.headers['authcode']
