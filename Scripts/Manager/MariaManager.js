@@ -2,8 +2,8 @@ const query = require('../../Lib/Maria')
 
 class MariaManager {
     adminAuth = []
-    
-    IsAdmin = (_authCode) =>{
+
+    IsAdmin = (_authCode) => {
         return this.adminAuth.length > 0 && this.adminAuth.some(x => x == _authCode) == true
     }
 
@@ -59,18 +59,21 @@ class MariaManager {
         query(`SELECT * FROM RankingPlus WHERE AuthCode = '${_authCode}'`, _rankingInfo => {
 
             var isAdmin = this.adminAuth.some(x => x.AuthCode == _authCode) == true;
-            if (_rankingInfo == undefined || isAdmin == true) {
-                if (_rankingInfo != undefined && isAdmin)
-                    _authCode += '_' + parseInt(new Date().toISOString().replace(/\D/g, '').slice(0, 14));
 
-                query(`INSERT INTO RankingPlus (AuthCode, Point, CorrectRate, Dps, Combo)
-                VALUES ('${_authCode}', '${_point}', '${_correctRate}', '${_dps}', '${_combo}')`,
-                    _newInfo => { _callback(_newInfo) })
-            }
-            else if (_rankingInfo.Point < _point) {
+            if (_rankingInfo != undefined && _rankingInfo.Point < _point) {
                 query(`UPDATE RankingPlus SET Point = '${_point}', CorrectRate = '${_correctRate}', Dps = '${_dps}', Combo = '${_combo}'
                 WHERE AuthCode = '${_authCode}'`,
                     _newInfo => { _callback(_newInfo) })
+            }
+            if (_rankingInfo == undefined || isAdmin == true) {
+                if (isAdmin == true && _rankingInfo != undefined){
+                    _authCode += '_' + parseInt(new Date().toISOString().replace(/\D/g, '').slice(0, 14))
+                    _callback(null)
+                }
+
+                query(`INSERT INTO RankingPlus (AuthCode, Point, CorrectRate, Dps, Combo)
+                VALUES ('${_authCode}', '${_point}', '${_correctRate}', '${_dps}', '${_combo}')`,
+                    _newInfo => { if (isAdmin == false) _callback(_newInfo) })
             }
             else
                 _callback(null)

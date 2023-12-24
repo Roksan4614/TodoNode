@@ -51,6 +51,10 @@ router.post('/ResultGame', (_req, _res) => {
             }
             else
                 m_rankingData[rankerIndex] = recordData
+
+            m_rankingData.sort(function (a, b) {
+                return b.Point - a.Point
+            })
         }
 
         packet.champion = {
