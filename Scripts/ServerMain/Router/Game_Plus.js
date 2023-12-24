@@ -78,4 +78,6 @@ mariaDB.GetRankingData_Plus(_rankingData => {
     m_rankingData.sort(function (a, b) {
         return b.Point - a.Point
     })
+
+    log.add("RankingData: ", JSON.stringify(m_rankingData))
 })
