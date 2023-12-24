@@ -1,5 +1,4 @@
 const log = require('../Lib/log')
-const util = require('../utils')
 const config = require('../config')
 const enums = require('../enums')
 const req_websocket = require('../Lib/websocket')

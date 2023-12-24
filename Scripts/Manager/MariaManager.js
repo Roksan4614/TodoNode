@@ -1,7 +1,7 @@
-const config = require('../config')
 const query = require('../../Lib/Maria')
 
 class MariaManager {
+    adminAuth = []
 
     GetData = (_key, _callback) => {
         query(_key, _callback)
@@ -17,6 +17,10 @@ class MariaManager {
 
     GetUserAuth_Nickname = (_nickname, _callback) => {
         query(`SELECT * FROM Account WHERE Nickname = '${_nickname}'`, _callback)
+    }
+
+    GetAdmin = (_callback) => {
+        query('SELECT * FROM Admin', _admin => { _callback(_admin) })
     }
 
     CreateNewUser = (_authID, _callback) => {
@@ -44,16 +48,16 @@ class MariaManager {
         query('SELECT * FROM RankingPlus', _rankingData => { _callback(_rankingData) })
     }
 
-    ResultGame_Plus = (_authCode, _point, _correctRate, _dps, _combo, _coin, _option, _callback) => {
+    ResultGame_Plus = (_authCode, _point, _correctRate, _dps, _combo, _coin, _callback) => {
 
         query(`UPDATE Account SET Coin='${_coin}' WHERE AuthCode='${_authCode}'`)
 
         query(`SELECT * FROM RankingPlus WHERE AuthCode = '${_authCode}'`, _rankingInfo => {
 
-            if (_rankingInfo == undefined || _option == 'admin') {
-
-                if (_rankingInfo != undefined && _option == 'admin')
-                    _authCode += '_'+parseInt(new Date().toISOString().replace(/\D/g, '').slice(0, 14));
+            var isAdmin = this.adminAuth.some(x => x.AuthCode == _authCode) == true;
+            if (_rankingInfo == undefined || isAdmin == true) {
+                if (_rankingInfo != undefined && isAdmin)
+                    _authCode += '_' + parseInt(new Date().toISOString().replace(/\D/g, '').slice(0, 14));
 
                 query(`INSERT INTO RankingPlus (AuthCode, Point, CorrectRate, Dps, Combo)
                 VALUES ('${_authCode}', '${_point}', '${_correctRate}', '${_dps}', '${_combo}')`,
@@ -96,3 +100,16 @@ function GetRandomAuthCode(_callback) {
             _callback(authCode)
     })
 }
+
+maria.GetAdmin(_admin => {
+    if (_admin != undefined) {
+
+        if (_admin.AuthID == undefined) {
+            for (i = 0; i < _admin.length; i++) {
+                maria.adminAuth.push(_admin[i].AuthCode)
+            }
+        }
+        else
+            maria.adminAuth.push(_admin.AuthCode)
+    }
+})

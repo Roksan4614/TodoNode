@@ -2,7 +2,6 @@ const mariaDB = require('../../Manager/MariaManager')
 const { NextFunction, Request, Response, Router } = require('express');
 const req_packet = require('../../../Lib/packet')
 const log = require('../../../Lib/log')
-const enums = require('../../enums');
 
 router = Router()
 module.exports = router
@@ -31,7 +30,7 @@ router.post('/Fetch/Ranking', (_req, _res) => {
 
 router.post('/ResultGame', (_req, _res) => {
 
-    mariaDB.ResultGame_Plus(_req.authCode, _req.body.point, _req.body.correctRate, _req.body.dps, _req.body.combo, _req.body.coin, _req.body.option, _result => {
+    mariaDB.ResultGame_Plus(_req.authCode, _req.body.point, _req.body.correctRate, _req.body.dps, _req.body.combo, _req.body.coin, _result => {
         let packet = new req_packet()
 
         if (_result != null) {
@@ -70,9 +69,14 @@ router.post('/ResultGame', (_req, _res) => {
 
 mariaDB.GetRankingData_Plus(_rankingData => {
     if (_rankingData != undefined) {
-        for (i = 0; i < _rankingData.length; i++) {
-            m_rankingData.push(_rankingData[i])
+
+        if (_rankingData.Point == undefined) {
+            for (i = 0; i < _rankingData.length; i++) {
+                m_rankingData.push(_rankingData[i])
+            }
         }
+        else
+            m_rankingData.push(_rankingData)
     }
 
     m_rankingData.sort(function (a, b) {

@@ -2,15 +2,15 @@ const mariaDB = require('../Manager/MariaManager')
 const log = require('../../Lib/log')
 const { NextFunction, Request, Response, Router } = require('express');
 const req_packet = require('../../Lib/packet')
-//const enums = require('../enums');
 
-const clients = []
+const m_clients = []
+
 const router = Router()
 module.exports = router
 const api_key = 'roksan1126091011040330'
 
 router.all('/*', (_req, _res, _next) => {
-    if (api_key != _req.headers['apikey']){
+    if (api_key != _req.headers['apikey']) {
         log.add("API_KEY ERROR: ", _req.headers['apikey'])
         return;
     }
@@ -29,7 +29,8 @@ router.post('/Connect', (_req, _res) => {
             })
         }
         else {
-            ReqUserInfo(_res, _userInfo)
+            var isAdmin = m_admin.length > 0 && m_admin.some(x => x.authID == _req.body.authID) == true
+            ReqUserInfo(_res, _userInfo, isAdmin)
         }
     })
 })
@@ -38,11 +39,11 @@ router.post('/Disconnect', (_req, _res) => {
     const authCode = _req.headers['authcode']
 
     // 나갔다면
-    const index = clients.findIndex(_x => _x.authCode = authCode)
+    const index = m_clients.findIndex(_x => _x.authCode = authCode)
 
     if (index > -1) {
-        log.add_Color(`222222`, `Disconnect:: [${clients.length - 1}] ${clients[index].nickname}`)
-        clients.splice(index, 1)
+        log.add_Color(`222222`, `Disconnect:: [${m_clients.length - 1}] ${m_clients[index].nickname}`)
+        m_clients.splice(index, 1)
     }
 
     var packet = new req_packet();
@@ -53,14 +54,14 @@ router.post('/Disconnect', (_req, _res) => {
 
 router.post('/user_count', (_req, _res) => {
     var packet = new req_packet()
-    packet.user_count = _req.body.password === "50252335" ? clients.length : -1
+    packet.user_count = _req.body.password === "50252335" ? m_clients.length : -1
 
     packet.Send(_req.originalUrl, _req.authCode, _res);
 })
 
 router.all('/*', (_req, _res, _next) => {
     const authCode = _req.headers['authcode']
-    if (authCode == undefined){
+    if (authCode == undefined) {
         log.add("authCode is undefined");
         return;
     }
@@ -70,15 +71,15 @@ router.all('/*', (_req, _res, _next) => {
     _next()
 })
 
-router.post('/nickname_change', (_req,_res) =>{
+router.post('/nickname_change', (_req, _res) => {
     mariaDB.SetNickname(_req.authCode, _req.body.nickname, _result => {
         var packet = new req_packet()
-        if( _result == null)
+        if (_result == null)
             packet.resultCode = "system error"
-        else{
-            index = clients.findIndex(_x => _x.authCode = _req.authCode)
+        else {
+            index = m_clients.findIndex(_x => _x.authCode = _req.authCode)
             if (index > -1)
-                clients[index].nickname = _req.body.nickname
+                m_clients[index].nickname = _req.body.nickname
         }
 
         packet.Send(_req.originalUrl, _req.authCode, _res);
@@ -87,11 +88,14 @@ router.post('/nickname_change', (_req,_res) =>{
 
 router.use('/plus', require('./Router/Game_Plus'))
 
-function ReqUserInfo(_res, _userInfo) {
+function ReqUserInfo(_res, _userInfo, _isAdmin = false) {
     let packet = new req_packet()
     packet.authCode = _userInfo.AuthCode
     packet.nickname = _userInfo.Nickname
     packet.coin = _userInfo.Coin
+
+    if (_isAdmin == true)
+        packet.isAdmin = _isAdmin;
 
     packet.Send('/Connect', packet.authCode, _res, false);
 
@@ -99,9 +103,9 @@ function ReqUserInfo(_res, _userInfo) {
 }
 
 function CheckingUserConnect(_authCode, _nickname) {
-    if (clients.length == 0 || clients.some(x => x.authCode == _authCode) == false) {
-        clients.push({ authCode: _authCode, nickname: _nickname })
-        log.add(`   Connect:: [${clients.length}] ${_nickname} (${_authCode})`)
+    if (m_clients.length == 0 || m_clients.some(x => x.authCode == _authCode) == false) {
+        m_clients.push({ authCode: _authCode, nickname: _nickname })
+        log.add(`   Connect:: [${m_clients.length}] ${_nickname} (${_authCode})`)
 
         mariaDB.SetLogin(_authCode);
     }

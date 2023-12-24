@@ -22,5 +22,4 @@ class PacketBase {
     }
 }
 
-
 module.exports = PacketBase
