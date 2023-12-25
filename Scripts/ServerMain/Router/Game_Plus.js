@@ -24,6 +24,8 @@ router.post('/Fetch/Ranking', (_req, _res) => {
         packet.userCount = m_rankingData.length
         packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
     }
+    else
+        log.add("rankingData", JSON.stringify(m_rankingData))
 
     packet.Send(_req.originalUrl, _req.authCode, _res);
 })
