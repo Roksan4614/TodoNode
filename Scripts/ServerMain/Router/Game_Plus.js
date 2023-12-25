@@ -89,5 +89,5 @@ mariaDB.GetRankingData_Plus(_rankingData => {
         return b.Point - a.Point
     })
 
-    log.add("RankingData: ", `UserCount: ${m_rankingData.length}`, JSON.stringify(m_rankingData))
+    log.add("RankingData: ", `UserCount: ${m_rankingData.length}`)
 })
