@@ -110,10 +110,11 @@ maria.GetAdmin(_admin => {
     if (_admin != undefined) {
         if (_admin.AuthID == undefined) {
             for (i = 0; i < _admin.length; i++) {
-                maria.adminAuth.push(_admin[i].AuthCode)
+                if (_admin[i].Active == true)
+                    maria.adminAuth.push(_admin[i].AuthCode)
             }
         }
-        else
+        else if (_admin.Active == true)
             maria.adminAuth.push(_admin.AuthCode)
     }
 })
