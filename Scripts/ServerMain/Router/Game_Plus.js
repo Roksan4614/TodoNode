@@ -8,6 +8,24 @@ module.exports = router
 
 m_rankingData = []
 
+router.post('/Fetch/myrecord', (_req, _res) => {
+    let packet = new req_packet()
+
+    var index = m_rankingData.findIndex(x => x.AuthCode == _req.authCode)
+
+    if (index == -1)
+        packet.resultCode = "Unranker"
+    else{
+        var myData = m_rankingData[index];
+        packet.recordPoint= myData.Point
+        packet.mostCombo= myData.Combo
+        packet.mostCorrectRate= myData.CorrectRate
+        packet.mostDps= myData.Dps
+    }
+
+    packet.Send(_req.originalUrl, _req.authCode, _res);
+})
+
 router.post('/Fetch/Ranking', (_req, _res) => {
     let packet = new req_packet()
 
@@ -22,7 +40,7 @@ router.post('/Fetch/Ranking', (_req, _res) => {
 
     if (m_rankingData.length >= 10) {
         packet.userCount = m_rankingData.length
-        packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
+        packet.ranking = m_rankingData.findIndex(_ranker => _ranker.AuthCode == _req.authCode)
     }
     else
         log.add("rankingData", JSON.stringify(m_rankingData))
@@ -70,7 +88,7 @@ router.post('/ResultGame', (_req, _res) => {
             packet.userCount = m_rankingData.length
             packet.ranking = m_rankingData.findIndex(_ranker => { return _ranker.AuthCode == _req.authCode })
         }
-        
+
         packet.Send(_req.originalUrl, _req.authCode, _res);
     });
 })
